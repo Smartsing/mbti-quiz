@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MBTI 人格小测 · 性格探秘局</title>
+<style>
+:root{
+  --ink:#221e3d; --ink2:#565077; --bg:#f6f4ff;
+  --card:#fff; --line:#e7e2f7; --soft:#f1edfd;
+  --ei:#06b6d4; --sn:#8b5cf6; --tf:#fb7185; --jp:#f59e0b;
+  --grad:linear-gradient(135deg,#8b5cf6 0%,#06b6d4 100%);
+  --shadow:0 10px 30px rgba(34,30,61,.10);
+  --radius:18px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{min-height:100%}
+body{
+  font-family:"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;
+  color:var(--ink);line-height:1.6;background:var(--bg);
+  background-image:
+    radial-gradient(ellipse 40% 30% at 8% 4%,rgba(139,92,246,.07) 0%,transparent 60%),
+    radial-gradient(ellipse 36% 28% at 94% 10%,rgba(6,182,212,.06) 0%,transparent 55%),
+    radial-gradient(ellipse 40% 30% at 90% 92%,rgba(251,113,133,.05) 0%,transparent 60%);
+  min-height:100vh;-webkit-font-smoothing:antialiased;
+  display:flex;justify-content:center;align-items:flex-start;padding:24px 16px 60px;
+}
+button{font-family:inherit;border:none;background:none;cursor:pointer;color:inherit}
+button:focus-visible,input:focus-visible{outline:3px solid rgba(139,92,246,.4);outline-offset:2px;border-radius:8px}
+#app{width:100%;max-width:560px}
+
+/* ---- 欢迎页 ---- */
+.welcome{text-align:center;padding:40px 20px}
+.welcome .logo{font-size:56px;margin-bottom:12px;letter-spacing:6px}
+.welcome h1{font-size:28px;font-weight:900;letter-spacing:.02em;margin-bottom:6px}
+.welcome .sub{font-size:14px;color:var(--ink2);font-weight:600;margin-bottom:28px}
+.welcome .info{display:flex;justify-content:center;gap:24px;margin-bottom:32px;flex-wrap:wrap}
+.welcome .info .it{text-align:center}
+.welcome .info .it b{display:block;font-size:26px;font-weight:900;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.welcome .info .it span{font-size:12px;color:var(--ink2);font-weight:700}
+.welcome .features{list-style:none;text-align:left;background:var(--card);border-radius:var(--radius);border:1px solid var(--line);padding:20px 24px;box-shadow:var(--shadow);margin-bottom:28px}
+.welcome .features li{display:flex;gap:10px;align-items:flex-start;font-size:13.5px;font-weight:600;padding:7px 0;line-height:1.55}
+.welcome .features li .ic{flex:none;width:24px;height:24px;border-radius:8px;background:var(--soft);display:flex;align-items:center;justify-content:center;font-size:13px}
+
+/* ---- 通用按钮 ---- */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  min-height:48px;padding:10px 24px;border-radius:14px;font-size:15px;font-weight:800;
+  transition:transform .15s ease,box-shadow .15s ease,background .15s ease;
+}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:var(--grad);color:#fff;box-shadow:0 8px 20px rgba(139,92,246,.35)}
+.btn-primary:hover{box-shadow:0 10px 26px rgba(139,92,246,.45)}
+.btn-ghost{background:#fff;border:1.5px solid var(--line);color:var(--ink)}
+.btn-ghost:hover{border-color:var(--sn)}
+.btn-block{width:100%}
+.btn[disabled]{opacity:.4;cursor:not-allowed;box-shadow:none}
+
+/* ---- 答题页 ---- */
+.quiz-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.quiz-head .cnt{font-size:13px;font-weight:800;color:var(--ink2)}
+.quiz-head .cnt b{color:var(--ink);font-size:15px}
+.quiz-head .retake-top{font-size:12px;font-weight:700;color:var(--ink2);text-decoration:underline;cursor:pointer}
+.quiz-head .retake-top:hover{color:var(--ink)}
+.pgr-track{height:10px;border-radius:999px;background:var(--soft);overflow:hidden;margin:6px 0 24px}
+.pgr-fill{height:100%;border-radius:999px;background:var(--grad);transition:width .4s cubic-bezier(.2,.8,.2,1)}
+.q-card{background:var(--card);border-radius:var(--radius);border:1px solid var(--line);padding:28px 24px;box-shadow:var(--shadow);margin-bottom:16px}
+.q-dim{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:800;padding:4px 12px;border-radius:999px;margin-bottom:14px}
+.q-text{font-size:19px;font-weight:800;line-height:1.5;margin-bottom:22px}
+.opts{display:flex;flex-direction:column;gap:12px}
+.opt{
+  display:flex;align-items:flex-start;gap:12px;text-align:left;width:100%;
+  padding:16px;border-radius:16px;border:2px solid var(--line);background:#fff;
+  font-size:15px;font-weight:600;line-height:1.5;transition:all .18s ease;
+}
+.opt:hover{border-color:#c9b8f5;transform:translateY(-1px)}
+.opt .pole{
+  flex:none;width:30px;height:30px;border-radius:10px;display:flex;align-items:center;justify-content:center;
+  font-weight:900;font-size:14px;margin-top:1px;background:var(--soft);color:var(--ink2);transition:all .18s ease;
+}
+.opt.picked{border-width:2px}
+.opt.picked .pole{color:#fff}
+.quiz-foot{display:flex;gap:12px}
+
+/* ---- 结果页 ---- */
+.result-hero{
+  border-radius:24px;padding:34px 24px 28px;text-align:center;color:#fff;position:relative;overflow:hidden;
+  box-shadow:0 16px 40px rgba(34,30,61,.28);margin-bottom:16px;
+}
+.result-hero::before{
+  content:"";position:absolute;inset:0;
+  background:radial-gradient(ellipse 70% 50% at 85% 0%,rgba(255,255,255,.25) 0%,transparent 60%);
+}
+.result-hero > *{position:relative;z-index:1}
+.result-hero .role-tag{
+  display:inline-block;font-size:11px;font-weight:800;letter-spacing:.16em;
+  padding:3px 14px;border-radius:999px;background:rgba(255,255,255,.2);margin-bottom:10px;
+}
+.result-hero .type-code{font-size:60px;font-weight:900;letter-spacing:.06em;line-height:1.1}
+.result-hero .type-title{font-size:18px;font-weight:800;margin-top:8px}
+.result-hero .barcode{
+  height:34px;margin:18px auto 0;width:58%;
+  background:repeating-linear-gradient(90deg,#fff 0 2px,transparent 2px 5px,#fff 5px 6px,transparent 6px 10px,#fff 10px 13px,transparent 13px 16px);
+  opacity:.7;
+}
+.dim-breakdown{background:var(--card);border-radius:var(--radius);border:1px solid var(--line);padding:22px;box-shadow:var(--shadow);margin-bottom:16px}
+.dim-breakdown h3{font-size:15px;font-weight:800;margin-bottom:16px}
+.dim-row{margin-bottom:14px}
+.dim-row:last-child{margin-bottom:0}
+.dim-head{display:flex;justify-content:space-between;font-size:13px;font-weight:800;margin-bottom:6px}
+.dim-track{height:12px;border-radius:999px;background:var(--soft);position:relative;overflow:visible}
+.dim-fill{height:100%;border-radius:999px;transition:width .8s cubic-bezier(.2,.8,.2,1)}
+.dim-marker{
+  position:absolute;top:50%;width:20px;height:20px;border-radius:50%;background:#fff;
+  border:4px solid var(--dc);transform:translate(-50%,-50%);left:0;transition:left .8s cubic-bezier(.2,.8,.2,1);
+  box-shadow:0 2px 8px rgba(34,30,61,.2);
+}
+.dim-pct{font-size:11px;color:var(--ink2);font-weight:700;text-align:center;margin-top:4px}
+.type-desc{background:var(--card);border-radius:var(--radius);border:1px solid var(--line);padding:22px;box-shadow:var(--shadow);margin-bottom:16px}
+.type-desc p{font-size:14.5px;line-height:1.75;font-weight:500}
+.tag-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.tag-row .chip{font-size:12px;font-weight:700;padding:5px 13px;border-radius:999px;background:var(--soft);border:1px solid var(--line)}
+.letters{background:var(--card);border-radius:var(--radius);border:1px solid var(--line);padding:22px;box-shadow:var(--shadow);margin-bottom:16px}
+.letters h3{font-size:15px;font-weight:800;margin-bottom:14px}
+.letter-item{display:flex;gap:14px;align-items:flex-start;padding:12px 0;border-bottom:1px dashed var(--line)}
+.letter-item:last-child{border-bottom:none}
+.letter-item .lt{
+  flex:none;width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;
+  font-weight:900;font-size:18px;color:#fff;
+}
+.letter-item .lc{flex:1}
+.letter-item .lc b{font-size:14px;display:block}
+.letter-item .lc span{font-size:12.5px;color:var(--ink2);line-height:1.55}
+.disclaimer{
+  background:#fffbeb;border:1.5px solid #fde68a;border-radius:14px;padding:14px 20px;
+  font-size:12.5px;color:#92710a;font-weight:600;line-height:1.65;text-align:center;margin-bottom:20px;
+}
+.result-actions{display:flex;gap:12px}
+
+/* ---- 计算动画 ---- */
+.calc-splash{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:380px;gap:18px}
+.calc-splash .spin{width:64px;height:64px;border-radius:50%;border:6px solid var(--soft);border-top-color:var(--sn);animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ---- 响应式 ---- */
+@media (max-width:480px){
+  body{padding:12px 10px 40px}
+  .welcome h1{font-size:24px}
+  .welcome .logo{font-size:44px}
+  .q-text{font-size:17px}
+  .result-hero .type-code{font-size:48px}
+  .opt{font-size:14px;padding:14px}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001s!important;transition-duration:.001s!important}
+}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<script>
+/* ===== 四维度元数据 ===== */
+const DIMS=['EI','SN','TF','JP'];
+const DIM_META={
+  EI:{label:'精力方向',a:'E',aName:'外向',b:'I',bName:'内向',color:'#06b6d4',soft:'#e0f7fc',desc:{
+    E:'外向 — 从与他人的互动和外部世界获取能量。喜欢表达、社交和行动。',
+    I:'内向 — 从独处和内心世界获取能量。喜欢思考、倾听和深度。',
+  }},
+  SN:{label:'信息获取',a:'S',aName:'实感',b:'N',bName:'直觉',color:'#8b5cf6',soft:'#efe9fd',desc:{
+    S:'实感 — 关注具体事实、细节和当下体验。相信经验和五官感知。',
+    N:'直觉 — 关注可能性、关联和未来图景。喜欢想象和抽象推理。',
+  }},
+  TF:{label:'决策方式',a:'T',aName:'思考',b:'F',bName:'情感',color:'#fb7185',soft:'#feeaee',desc:{
+    T:'思考 — 依据逻辑和客观分析做决定。重视公平和效率。',
+    F:'情感 — 依据价值观和对他人的影响做决定。重视和谐与共情。',
+  }},
+  JP:{label:'生活风格',a:'J',aName:'计划',b:'P',bName:'随性',color:'#f59e0b',soft:'#fdf2dd',desc:{
+    J:'计划 — 喜欢有序、确定和提前规划。重视执行和闭环。',
+    P:'随性 — 喜欢灵活、开放和随机应变。重视自由和可能性。',
+  }}
+};
+
+/* ===== 20 道原创题（四维度×5，选项 0=E/S/T/J，选项 1=I/N/F/P） ===== */
+const QUESTIONS=[
+  {d:'EI',q:'周五晚上的团建刚散场，你的状态更像？',a:['意犹未尽，想再约一顿夜宵','社交电量耗尽，只想回家安静充电']},
+  {d:'EI',q:'电梯里遇到不太熟的同事，你会？',a:['主动开个话题聊两句','微笑点头，默默看楼层数字']},
+  {d:'EI',q:'开会时你的发言风格是？',a:['想到就说，边说边想','想清楚了再说，没想好先听']},
+  {d:'EI',q:'周末你更愿意？',a:['约朋友出去玩，人越多越热闹','自己待着，或只约一两个熟人']},
+  {d:'EI',q:'遇到烦心事，你更倾向？',a:['找人倾诉，说出来就好多了','自己消化，先静一静']},
+  {d:'SN',q:'拿到一份新项目资料，你先看？',a:['数据、图表和执行细节','摘要和这件事的战略意义']},
+  {d:'SN',q:'同事跟你聊他昨晚做的梦，你的反应？',a:['有点绕，赶紧拉回正题','好奇，追问细节和隐喻']},
+  {d:'SN',q:'你更欣赏哪种同事？',a:['脚踏实地、说到做到','脑洞大、点子多']},
+  {d:'SN',q:'学一个新工具，你喜欢？',a:['跟着教程一步步来','自己瞎摸索，先玩再说']},
+  {d:'SN',q:'描述上周末，你会说？',a:['具体去了哪、吃了啥、花了多少','整体氛围怎么样、有什么感受']},
+  {d:'TF',q:'同事的方案被否了来找你诉苦，你先？',a:['帮他分析到底哪里出了问题','先接住情绪，再聊事情本身']},
+  {d:'TF',q:'团队投票出现分歧，你倾向？',a:['看数据和逻辑，谁有理听谁的','照顾大家感受，找折中方案']},
+  {d:'TF',q:'更像你的夸人方式？',a:['"这个方案做得真严谨"','"跟你合作太舒服了"']},
+  {d:'TF',q:'朋友问你该不该跳槽，你会？',a:['列利弊清单帮他理性分析','先问他自己心里更想要什么']},
+  {d:'TF',q:'你觉得好领导最重要的是？',a:['公平公正，赏罚分明','关心下属，有人情味']},
+  {d:'JP',q:'出去旅游，你的行程安排？',a:['提前做攻略，精确到小时','随缘，走到哪玩到哪']},
+  {d:'JP',q:'你的工位桌面状态？',a:['分类整齐，物归原位','乱中有序，只有自己懂']},
+  {d:'JP',q:'deadline 对你来说是？',a:['红线，提前完成才安心','第一生产力，临近才爆发']},
+  {d:'JP',q:'计划突然被打乱，你会？',a:['有点焦躁，得赶紧重排','还好，随机应变呗']},
+  {d:'JP',q:'周一早上的你？',a:['周日晚上就列好了本周待办','到公司再想今天先干啥']},
+];
+
+/* ===== 16 型文案 ===== */
+const ROLES={NT:{name:'分析家',color:'#8b5cf6'},NF:{name:'外交家',color:'#10b981'},SJ:{name:'守护者',color:'#3b82f6'},SP:{name:'探险家',color:'#f59e0b'}};
+function roleOf(t){return(t[1]==='N')?(t[2]==='T'?'NT':'NF'):(t[3]==='J'?'SJ':'SP');}
+const TYPES={
+  INTJ:{title:'战略军师',desc:'冷静的长期主义者，脑子里永远装着完整棋局。表面波澜不惊，内心已经推演了十步。',tags:['独立','谋定后动','标准极高']},
+  INTP:{title:'逻辑炼金师',desc:'行走的十万个为什么，对"为什么"的执念远大于"多少钱"。看起来很安静，脑子里在开 party。',tags:['好奇','逻辑控','思辨']},
+  ENTJ:{title:'天生指挥官',desc:'目标感极强，开会永远第一个问"所以结论是什么"。拖延症在他面前会自动痊愈。',tags:['果断','目标导向','气场全开']},
+  ENTP:{title:'辩论鬼才',desc:'抬杠界的艺术家——反对你不是因为不同意，只是觉得这事还能再聊聊。',tags:['脑洞','好辩','点子王']},
+  INFJ:{title:'理想主义军师',desc:'外冷内热的稀有款，擅长看穿人心又假装没看穿。写给未来的计划，永远比说出口的多。',tags:['洞察','外冷内热','有远见']},
+  INFP:{title:'治愈系梦想家',desc:'内心住着一片海，共情能力满分。看起来在发呆，其实在写诗。',tags:['共情','理想主义','内心戏足']},
+  ENFJ:{title:'人形充电宝',desc:'走到哪都能把气氛焐热，操心完所有人的情绪，才开始想起自己。',tags:['热场','操心','感染力']},
+  ENFP:{title:'人间小太阳',desc:'快乐修狗型人格，兴趣清单比待办清单长三倍。口头禅：下周一定专注。',tags:['热情','好奇心','自来熟']},
+  ISTJ:{title:'靠谱守门员',desc:'行走的 Excel，说过的话都会落地。"临时改动"四个字是他的天敌。',tags:['靠谱','严谨','说到做到']},
+  ISFJ:{title:'幕后守护者',desc:'团队里默默补位的人，把"我帮你"说成口头禅，自己的功劳只字不提。',tags:['细心','奉献','靠谱']},
+  ESTJ:{title:'执行大管家',desc:'规则与效率的信徒，"差不多"三个字会让他血压升高。',tags:['执行力','公正','组织力']},
+  ESFJ:{title:'气氛担当',desc:'团建他张罗、生日他记得、零食柜他补货。没有他，办公室直接降级。',tags:['热心','记性好','凝聚力']},
+  ISTP:{title:'冷静手艺人',desc:'话少手稳，工位就是主场。别问他在想什么——他在拆解原理。',tags:['动手力','冷静','独行侠']},
+  ISFP:{title:'低调艺术家',desc:'审美长在骨子里，讨厌冲突，相信爱与美都要细水长流。',tags:['审美','温和','感性']},
+  ESTP:{title:'行动派狠人',desc:'先干再说，人生没有弯路只有漂移。让他等？不如让他去闯。',tags:['行动力','胆大','现场感']},
+  ESFP:{title:'全场焦点',desc:'自带打光出场，气氛组的灵魂人物。人生信条：开心要趁热。',tags:['表演欲','乐观','活气氛']},
+};
+
+/* ===== 状态 ===== */
+const LS_KEY='mbti_quiz_v1';
+let answers=new Array(QUESTIONS.length).fill(null);
+let qi=0,view='welcome';
+try{const raw=localStorage.getItem(LS_KEY);if(raw){const s=JSON.parse(raw);if(s.answers)answers=s.answers;if(typeof s.qi==='number')qi=s.qi;if(s.view)view=s.view;}}catch(e){}
+function save(){try{localStorage.setItem(LS_KEY,JSON.stringify({answers,qi,view}));}catch(e){}}
+function shade(hex,amt){const n=parseInt(hex.slice(1),16);const c=v=>Math.max(0,Math.min(255,Math.round(v)));const r=c((n>>16)+amt*2.55),g=c(((n>>8)&255)+amt*2.55),b=c((n&255)+amt*2.55);return'#'+((r<<16)|(g<<8)|b).toString(16).padStart(6,'0');}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+/* ===== 渲染 ===== */
+const app=document.getElementById('app');
+function render(){
+  if(view==='welcome')return renderWelcome();
+  if(view==='quiz')return renderQuiz();
+  if(view==='calc')return renderCalc();
+  if(view==='result')return renderResult();
+}
+function renderWelcome(){
+  const answered=answers.filter(a=>a!==null).length;
+  app.innerHTML=`
+    <div class="welcome">
+      <div class="logo">🎭🧩✨</div>
+      <h1>性格探秘局</h1>
+      <p class="sub">20 道趣味二选一 · 揭开你的 MBTI 人格密码</p>
+      <div class="info">
+        <div class="it"><b>20</b><span>道趣味题</span></div>
+        <div class="it"><b>≈3</b><span>分钟完成</span></div>
+        <div class="it"><b>16</b><span>种人格类型</span></div>
+      </div>
+      <ul class="features">
+        <li><span class="ic">📝</span><span>四维度均衡覆盖：精力方向 · 信息获取 · 决策方式 · 生活风格</span></li>
+        <li><span class="ic">🎨</span><span>测完领专属人格工牌，含四维倾向比例与特点说明</span></li>
+        <li><span class="ic">🔄</span><span>支持随时返回上一题修改、中途退出自动保存进度</span></li>
+      </ul>
+      ${answered>0?`<button class="btn btn-primary btn-block" data-act="continue">继续上次答题（已完成 ${answered}/20）</button>
+      <button class="btn btn-ghost btn-block" style="margin-top:10px" data-act="restart">重新开始</button>`
+      :`<button class="btn btn-primary btn-block" data-act="start">开始测评</button>`}
+      <p style="font-size:11px;color:var(--ink2);margin-top:20px;line-height:1.6">本测评仅供娱乐和自我了解，不构成心理诊断或专业建议</p>
+    </div>`;
+}
+function renderQuiz(){
+  const answered=answers.filter(a=>a!==null).length;
+  const q=QUESTIONS[qi],dm=DIM_META[q.d];
+  app.innerHTML=`
+    <div class="quiz-head">
+      <span class="cnt">第 <b>${qi+1}</b> / ${QUESTIONS.length} 题</span>
+      <span class="retake-top" data-act="restart">重新开始</span>
+    </div>
+    <div class="pgr-track"><div class="pgr-fill" style="width:${(answered/QUESTIONS.length*100).toFixed(1)}%"></div></div>
+    <div class="q-card">
+      <span class="q-dim" style="background:${dm.soft};color:${shade(dm.color,-25)}">${dm.label} · ${dm.aName} vs ${dm.bName}</span>
+      <div class="q-text">${esc(q.q)}</div>
+      <div class="opts">
+        ${q.a.map((txt,oi)=>{
+          const picked=answers[qi]===oi;
+          return `<button class="opt ${picked?'picked':''}" data-act="pick" data-oi="${oi}"
+            style="${picked?`border-color:${dm.color};background:${dm.soft}`:''}">
+            <span class="pole" style="${picked?`background:${dm.color};color:#fff`:''}">${oi===0?dm.a:dm.b}</span>
+            <span>${esc(txt)}</span></button>`;
+        }).join('')}
+      </div>
+    </div>
+    <div class="quiz-foot">
+      <button class="btn btn-ghost" data-act="prev" ${qi===0?'disabled':''}>上一题</button>
+      ${answered===QUESTIONS.length?
+        `<button class="btn btn-primary" style="flex:1" data-act="finish">查看结果 ✨</button>`
+        :`<button class="btn btn-ghost" style="flex:1" data-act="next" ${qi===QUESTIONS.length-1?'disabled':''}>下一题</button>`}
+    </div>`;
+}
+function renderCalc(){
+  app.innerHTML=`<div class="calc-splash">
+    <div class="spin"></div>
+    <div style="font-weight:900;font-size:16px">灵魂解析中…</div>
+    <div style="font-size:13px;color:var(--ink2);font-weight:600">正在合成你的人格工牌</div>
+  </div>`;
+}
+function renderResult(){
+  const letters=[],dp=[];
+  DIMS.forEach((d,di)=>{
+    let cntA=0;
+    QUESTIONS.forEach((q,qi2)=>{if(q.d===d&&answers[qi2]===0)cntA++;});
+    const pctA=Math.round(cntA/5*100),dm=DIM_META[d];
+    const letter=cntA>=3?dm.a:dm.b;
+    letters.push(letter);dp.push(pctA); // dp 统一表示左侧极（E/S/T/J）百分比
+  });
+  const type=letters.join(''),role=ROLES[roleOf(type)],t=TYPES[type];
+  app.innerHTML=`
+    <div class="result-hero" style="background:linear-gradient(150deg,${role.color} 0%,${shade(role.color,-30)} 130%)">
+      <span class="role-tag">${role.name}阵营</span>
+      <div class="type-code">${type}</div>
+      <div class="type-title">「${t.title}」</div>
+      <div class="barcode"></div>
+    </div>
+    <div class="dim-breakdown">
+      <h3>你的四维倾向</h3>
+      ${DIMS.map((d,i)=>{
+        const dm=DIM_META[d],lp=dp[i];
+        const leftWins=lp>=50;
+        const fillStyle=leftWins
+          ?`left:0;width:${lp}%`
+          :`right:0;width:${100-lp}%`;
+        return `<div class="dim-row">
+          <div class="dim-head"><span style="color:${shade(dm.color,-20)}">${dm.a} · ${dm.aName}</span><span style="color:var(--ink2)">${dm.b} · ${dm.bName}</span></div>
+          <div class="dim-track"><div class="dim-fill" style="background:${dm.color};position:absolute;top:0;height:100%;border-radius:999px;${fillStyle}"></div>
+          <div class="dim-marker" style="--dc:${dm.color};border-color:${dm.color};left:${lp}%"></div></div>
+          <div class="dim-pct">${leftWins?dm.a:dm.b} 倾向 ${Math.max(lp,100-lp)}%</div>
+        </div>`;
+      }).join('')}
+    </div>
+    <div class="type-desc">
+      <p>${esc(t.desc)}</p>
+      <div class="tag-row">${t.tags.map(x=>`<span class="chip">${esc(x)}</span>`).join('')}</div>
+    </div>
+    <div class="letters">
+      <h3>四个字母的含义</h3>
+      ${DIMS.map((d,i)=>{
+        const dm=DIM_META[d],l=letters[i];
+        return `<div class="letter-item">
+          <div class="lt" style="background:${dm.color}">${l}</div>
+          <div class="lc"><b>${l} · ${l===dm.a?dm.aName:dm.bName}</b><span>${dm.desc[l]}</span></div>
+        </div>`;
+      }).join('')}
+    </div>
+    <div class="disclaimer">⚠️ 本测评仅供娱乐和自我了解，不构成心理诊断或专业建议</div>
+    <div class="result-actions">
+      <button class="btn btn-ghost" style="flex:1" data-act="review">回看答题</button>
+      <button class="btn btn-primary" style="flex:1" data-act="restart">重新测试</button>
+    </div>`;
+}
+
+/* ===== 交互 ===== */
+app.addEventListener('click',e=>{
+  const t=e.target.closest('[data-act]');if(!t)return;
+  const act=t.dataset.act;
+  if(act==='start'||act==='restart'){answers=new Array(QUESTIONS.length).fill(null);qi=0;view='quiz';save();render();}
+  else if(act==='continue'){view='quiz';const f=answers.findIndex(a=>a===null);qi=f<0?QUESTIONS.length-1:f;save();render();}
+  else if(act==='pick'){answers[qi]=+t.dataset.oi;save();if(answers.every(a=>a!==null)){qi=QUESTIONS.length-1;render();}else if(qi<QUESTIONS.length-1){setTimeout(()=>{qi++;render();},250);}else render();}
+  else if(act==='prev'){if(qi>0){qi--;save();render();}}
+  else if(act==='next'){if(qi<QUESTIONS.length-1){qi++;save();render();}}
+  else if(act==='finish'){view='calc';save();render();setTimeout(()=>{view='result';save();render();window.scrollTo(0,0);},1200);}
+  else if(act==='review'){view='quiz';save();render();}
+});
+
+render();
+</script>
+</body>
+</html>
